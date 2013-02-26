@@ -331,6 +331,29 @@ suite('multilayer', function() {
       );
     });
 
+    test("post layergroup with wrong style", function(done) {
+        var layergroup =  {
+          version: '1.0.0',
+          layers: [{ 
+            options: {
+                 sql: 'select * test_table limit 2',
+                 cartocss: '#layer { JAJAJAJA marker-fill:red; marker-width:32; marker-allow-overlap:true; }'
+             } 
+          }]
+        };
+        assert.response(server, {
+            url: '/database/windshaft_test/layergroup',
+            method: 'POST',
+            headers: {'Content-Type': 'application/json' },
+            data: JSON.stringify(layergroup)
+        }, {}, function(res) {
+            assert.equal(res.statusCode, 400, res.body);
+            var parsedBody = JSON.parse(res.body);
+            assert.deepEqual(parsedBody, {"errors":["style0:1:10 Invalid code: JAJAJAJA marker-fill:red;"]});
+            done();
+        });
+    });
+
     // TODO: check lifetime of layergroup!
 
     ////////////////////////////////////////////////////////////////////
